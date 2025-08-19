@@ -59,7 +59,7 @@ public class CustomerProcessor implements EntityCollectionProcessor, EntityProce
         ODataSerializer serializer = odata.createSerializer(requestedContentType);
 
         UriResourceEntitySet uriResourceEntitySet =
-                (UriResourceEntitySet) uriInfo.getUriResourceParts().get(0);
+                (UriResourceEntitySet) uriInfo.getUriResourceParts().getFirst();
         EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
 
         ContextURL contextUrl = ContextURL.with()
@@ -67,14 +67,17 @@ public class CustomerProcessor implements EntityCollectionProcessor, EntityProce
                 .suffix(ContextURL.Suffix.ENTITY)     // Include suffix if it's a single entity
                 .build();
 
-        EntitySerializerOptions opts = EntitySerializerOptions.with()
+        EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions
+                .with()
                 .contextURL(contextUrl)
                 .build();
 
-
-
         SerializerResult serializerResult = serializer.entityCollection(
-                serviceMetadata, serializer, entityCollection, opts);
+                serviceMetadata,
+                edmEntitySet.getEntityType(),
+                entityCollection,
+                opts
+        );
 
         response.setContent(serializerResult.getContent());
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
